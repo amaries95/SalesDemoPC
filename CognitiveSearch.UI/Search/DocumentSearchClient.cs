@@ -85,15 +85,6 @@ namespace CognitiveSearch.UI
                 Model = new SearchModel(Schema);
 
                 _isPathBase64Encoded = (configuration.GetSection("IsPathBase64Encoded")?.Value == "True");
-
-                //var docs = response.GetResults();
-
-                //foreach (var doc in docs)
-                //{
-                //    var x = doc.Document;
-                //    Value deserialized = JsonConvert.DeserializeObject<Value>(x.ToString());
-                //    Files.Add(deserialized);
-                //}
             }
             catch (Exception e)
             {
@@ -109,8 +100,6 @@ namespace CognitiveSearch.UI
 
             try
             {
-                //SearchOptions options = GenerateSearchOptions(searchFacets, selectFilter, currentPage, polygonString, queryType);
-
                 SearchResults<SearchDocument> response = _searchClient.Search<SearchDocument>(searchText);
 				var docs = response.GetResults();
 
