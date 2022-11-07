@@ -130,6 +130,7 @@ namespace CognitiveSearch.UI.Controllers
             var viewModel = new DocumentsRetrievedViewModel
             {
                 SasToken = azureManager.GetBlobStorageSasToken(),
+                FilesInfo = documentsRetrieved
             };
 
             viewModel.MetadataStoragePath.AddRange(documentsRetrieved.Select(x => x.metadata_storage_path));

@@ -33,7 +33,6 @@ namespace CognitiveSearch.UI.AzureManagement
 			var sasUri = blobContainerClient.GenerateSasUri(BlobContainerSasPermissions.Read, DateTimeOffset.UtcNow.AddHours(2));
 
 			return sasUri.Query.ToString();
-
 		}
     }
 }

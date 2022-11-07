@@ -8,7 +8,7 @@
 }
 
 <!-- Pass controller data to view -->
-<script>
+<script src="~/js/searchView.js">
    
 </script>
 <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
@@ -82,18 +82,23 @@
     <div class="col-md-10">
         <div style="margin:0 10px 10px 10px;">
             <h2 id="query-div" style="margin-top:-10px; font-size:14px;" class="alert info">Response</h2>
-            @*<h2 id="answer-div" style="margin-top:-10px; font-size:14px;" class="alert info">Answer</h2>*@
             <h2 id="doc-count" style="margin-top:-10px; font-size:14px; display:inline">Number of Documents retrieved: @Model.MetadataStoragePath.Count</h2>
             <div class="documents-dropdown-list">
-                <select>
+                <select onchange="onSelectedChanged(event)" accesskey="@Model.SasToken">
                     <option value="none">Choose an option...</option>
-                    @foreach (var doc in Model.MetadataStoragePath)
+                    @foreach (var doc in Model.FilesInfo)
                     {
-                        <option value="@doc">@doc</option>
+                        <option value="@Newtonsoft.Json.JsonConvert.SerializeObject(doc)">
+                                        @doc.metadata_storage_path</option>
                     }
                 </select>
             </div>
-            <iframe src="@Model.MetadataStoragePath[0]@Model.SasToken" width="800px" height="2100px"/>
+            <div class="col-md-6">
+                <embed id="pdfViewer" class="pdfviewer"/>
+            </div>
+            <div class="col-md-6">
+                <div class="relations-container" id="entities-container">
+                </div>
             <div id="maps-viewer"></div>
             <div style="display:inline;position: relative;top:-10px;left:10px;">
                 <span id="loading-indicator" class="ms-Spinner ms-Spinner--large" style="display:none;"></span>
@@ -160,5 +165,4 @@
         </div>
     </div>
 </div>
-
 

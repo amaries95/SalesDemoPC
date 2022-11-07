@@ -81,8 +81,8 @@ namespace CognitiveSearch.UI
                 _searchClient = _searchIndexClient.GetSearchClient(IndexName);
                 //SearchResults<SearchDocument> response = _searchClient.Search<SearchDocument>("");
 
-                Schema = new SearchSchema().AddFields(_searchIndexClient.GetIndex(IndexName).Value.Fields);
-                Model = new SearchModel(Schema);
+                //Schema = new SearchSchema().AddFields(_searchIndexClient.GetIndex(IndexName).Value.Fields);
+                //Model = new SearchModel(Schema);
 
                 _isPathBase64Encoded = (configuration.GetSection("IsPathBase64Encoded")?.Value == "True");
             }
