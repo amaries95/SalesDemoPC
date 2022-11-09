@@ -1,30 +1,70 @@
 ﻿
-function onSelectedChanged(event)
-{
-    const selectedOption = JSON.parse(event.currentTarget.selectedOptions[0].value);
-    
-    var entitiesContainer = document.getElementById("entities-container");
-    deleteAllHtmlElements("entity");
+function onSelectedChanged(event) {
+    deleteAllHtmlElements();
 
-    for (let index = 0; index < selectedOption.named_entities.length; index++) {
-        var entityElement = document.createElement("div");
-        entityElement.classList.add('entity');
-
-        entityElement.innerText = selectedOption.named_entities[index].text;
-        entitiesContainer.appendChild(entityElement);
-    }
-    
     const pdfViewer = document.getElementById("pdfViewer");
+    const selectedOptionValue = event.currentTarget.selectedOptions[0].value;
+
+    if (selectedOptionValue === "none") {
+        pdfViewer.src = " ";
+
+        return;
+    }
+
+    const selectedOption = JSON.parse(selectedOptionValue);
+    var entitiesContainer = document.getElementById("entities-container");
 
     pdfViewer.src = selectedOption.metadata_storage_path + event.currentTarget.accessKey;
+
+    var entities = document.createElement("div");
+    entities.classList.add("relations-container");
+    entitiesContainer.appendChild(entities);
+
+    for (let index = 0; index < selectedOption.named_entities.length; index++) {
+        const entityElement = document.createElement("div");
+        entityElement.classList.add('entity');
+        entityElement.id = selectedOption.named_entities[index].id;
+
+        entityElement.innerText = selectedOption.named_entities[index].text;
+        entities.appendChild(entityElement);
+    }
+
+    emphasizeRelationsBetweenEntities(selectedOption.named_entities_relations);
+    pdfViewer.style.height = entitiesContainer.scrollHeight +"px";
 }
 
-function deleteAllHtmlElements(identifier) {
-    var entities = document.getElementsByClassName(identifier);
+function emphasizeRelationsBetweenEntities(relations) {
+    var index = 0;
+    var colorIndex = 0;
+
+    while (index < relations.length) {
+        let leftRelation = relations[index].left;
+        let leftEntity = document.getElementById(leftRelation);
+        let randomColor = getRandomColor(colorIndex);
+        leftEntity.style.backgroundColor = randomColor;
+
+        while (index < relations.length && leftRelation == relations[index].left ) {
+            let rightEntity = document.getElementById(relations[index].right);
+            rightEntity.style.backgroundColor = randomColor;
+
+            index++;
+        }
+
+        colorIndex++;
+    }
+}
+
+function deleteAllHtmlElements() {
+   
+    var entities = document.getElementsByClassName("relations-container");
 
     if (entities.length > 0) {
-        for (let i = 0; i < entities.length; i++) {
-            entities[i].remove();
-        }
+        entities[0].remove();
     }
+}
+
+function getRandomColor(colorIndex) {
+    const colors = ["purple", "olive", "teal", "chocolate", "crimson", "gray", "limegreen", "mediumpurple", "wheat", "seagreen", "lightsalmon", "darkred", "hotpink"];
+
+    return colors[colorIndex];
 }

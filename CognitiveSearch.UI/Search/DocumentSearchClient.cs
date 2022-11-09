@@ -79,10 +79,7 @@ namespace CognitiveSearch.UI
                 // Create an HTTP reference to the catalog index
                 _searchIndexClient = new SearchIndexClient(new Uri($"https://{searchServiceName}.search.windows.net/"), new AzureKeyCredential(apiKey), options: clientOptions);
                 _searchClient = _searchIndexClient.GetSearchClient(IndexName);
-                //SearchResults<SearchDocument> response = _searchClient.Search<SearchDocument>("");
-
-                //Schema = new SearchSchema().AddFields(_searchIndexClient.GetIndex(IndexName).Value.Fields);
-                //Model = new SearchModel(Schema);
+                
 
                 _isPathBase64Encoded = (configuration.GetSection("IsPathBase64Encoded")?.Value == "True");
             }
@@ -94,14 +91,24 @@ namespace CognitiveSearch.UI
             }
         }
 
-        public List<Value> Search(string searchText, SearchFacet[] searchFacets = null, string[] selectFilter = null, int currentPage = 1, string polygonString = null, SearchQueryType queryType= SearchQueryType.Semantic)
+		public List<Value> GetAllDocuments(string query, SearchFacet[] searchFacets, int currentPage, string polygonString = null, SearchQueryType queryType = SearchQueryType.Full)
+		{
+			var response = Search(query, searchFacets,null,currentPage,polygonString, queryType);
+
+			return response;
+
+		}
+
+		public List<Value> Search(string searchText, SearchFacet[] searchFacets = null, string[] selectFilter = null, int currentPage = 1, string polygonString = null, SearchQueryType queryType= SearchQueryType.Full)
         {
 		    List<Value> files = new List<Value>();
 
             try
             {
+                SearchOptions options = GenerateSearchOptions(searchFacets, selectFilter, currentPage, polygonString, SearchQueryType.Semantic);
                 SearchResults<SearchDocument> response = _searchClient.Search<SearchDocument>(searchText);
-				var docs = response.GetResults();
+
+                var docs = response.GetResults();
 
                 foreach (var doc in docs)
                 {
@@ -118,7 +125,7 @@ namespace CognitiveSearch.UI
             return files;
         }
 
-        public SearchOptions GenerateSearchOptions(SearchFacet[] searchFacets = null, string[] selectFilter = null, int currentPage = 1, string polygonString = null, SearchQueryType queryType = SearchQueryType.Full)
+        public SearchOptions GenerateSearchOptions(SearchFacet[] searchFacets = null, string[] selectFilter = null, int currentPage = 1, string polygonString = null, SearchQueryType queryType = SearchQueryType.Semantic)
         {
             SearchOptions options = new SearchOptions()
             {
@@ -138,74 +145,74 @@ namespace CognitiveSearch.UI
                 options.SemanticConfigurationName = SemanticConfiguration;
             }
 
-            foreach (string s in selectFilter)
-            {
-                options.Select.Add(s);
-            }
+            //foreach (string s in selectFilter)
+            //{
+            //    options.Select.Add(s);
+            //}
 
-            var facets = Model.Facets.Select(f => f.Name).ToList();
-            foreach (string f in facets)
-            {
-                options.Facets.Add(f);
-            }
+            //var facets = Model.Facets.Select(f => f.Name).ToList();
+            //foreach (string f in facets)
+            //{
+            //    options.Facets.Add(f);
+            //}
 
-            foreach (string h in Model.SearchableFields)
-            {
-                options.HighlightFields.Add(h);
-            }
+            //foreach (string h in Model.SearchableFields)
+            //{
+            //    options.HighlightFields.Add(h);
+            //}
 
 
-            string filter = null;
-            var filterStr = string.Empty;
+            //string filter = null;
+            //var filterStr = string.Empty;
 
-            if (searchFacets != null)
-            {
-                foreach (var item in searchFacets)
-                {
-                    var facet = Model.Facets.Where(f => f.Name == item.Key).FirstOrDefault();
+            //if (searchFacets != null)
+            //{
+            //    foreach (var item in searchFacets)
+            //    {
+            //        var facet = Model.Facets.Where(f => f.Name == item.Key).FirstOrDefault();
 
-                    filterStr = string.Join(",", item.Value);
+            //        filterStr = string.Join(",", item.Value);
 
-                    // Construct Collection(string) facet query
-                    if (facet.Type == typeof(string[]))
-                    {
-                        if (string.IsNullOrEmpty(filter))
-                            filter = $"{item.Key}/any(t: search.in(t, '{filterStr}', ','))";
-                        else
-                            filter += $" and {item.Key}/any(t: search.in(t, '{filterStr}', ','))";
-                    }
-                    // Construct string facet query
-                    else if (facet.Type == typeof(string))
-                    {
-                        if (string.IsNullOrEmpty(filter))
-                            filter = $"{item.Key} eq '{filterStr}'";
-                        else
-                            filter += $" and {item.Key} eq '{filterStr}'";
-                    }
-                    // Construct DateTime facet query
-                    else if (facet.Type == typeof(DateTime))
-                    {
-                        // TODO: Date filters
-                    }
-                }
-            }
+            //        // Construct Collection(string) facet query
+            //        if (facet.Type == typeof(string[]))
+            //        {
+            //            if (string.IsNullOrEmpty(filter))
+            //                filter = $"{item.Key}/any(t: search.in(t, '{filterStr}', ','))";
+            //            else
+            //                filter += $" and {item.Key}/any(t: search.in(t, '{filterStr}', ','))";
+            //        }
+            //        // Construct string facet query
+            //        else if (facet.Type == typeof(string))
+            //        {
+            //            if (string.IsNullOrEmpty(filter))
+            //                filter = $"{item.Key} eq '{filterStr}'";
+            //            else
+            //                filter += $" and {item.Key} eq '{filterStr}'";
+            //        }
+            //        // Construct DateTime facet query
+            //        else if (facet.Type == typeof(DateTime))
+            //        {
+            //            // TODO: Date filters
+            //        }
+            //    }
+            //}
 
-            options.Filter = filter;
+            //options.Filter = filter;
 
-            // Add Filter based on geographic polygon if it is set.
-            if (polygonString != null && polygonString.Length > 0)
-            {
-                string geoQuery = "geo.intersects(geoLocation, geography'POLYGON((" + polygonString + "))')";
+            //// Add Filter based on geographic polygon if it is set.
+            //if (polygonString != null && polygonString.Length > 0)
+            //{
+            //    string geoQuery = "geo.intersects(geoLocation, geography'POLYGON((" + polygonString + "))')";
                 
-                if (options.Filter != null && options.Filter.Length > 0)
-                { 
-                    options.Filter += " and " + geoQuery; 
-                }
-                else
-                { 
-                    options.Filter = geoQuery; 
-                }
-            }
+            //    if (options.Filter != null && options.Filter.Length > 0)
+            //    { 
+            //        options.Filter += " and " + geoQuery; 
+            //    }
+            //    else
+            //    { 
+            //        options.Filter = geoQuery; 
+            //    }
+            //}
 
             return options;
         }
@@ -317,14 +324,6 @@ namespace CognitiveSearch.UI
                 Console.WriteLine("Error querying index: {0}\r\n", ex.Message.ToString());
             }
             return null;
-        }
-
-        public List<Value> GetAllDocuments(string query)
-        {
-            var response = Search(query);
-
-            return response;
-
         }
 
         public DocumentResult GetDocuments(string q, SearchFacet[] searchFacets, int currentPage, string polygonString = null, SearchQueryType queryType = SearchQueryType.Full)

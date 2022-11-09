@@ -125,7 +125,8 @@ namespace CognitiveSearch.UI.Controllers
             if (CheckDocSearchInitialized())
                 searchidId = _docSearch.GetSearchId().ToString();
 
-            var documentsRetrieved = _docSearch.GetAllDocuments(searchParams.q);
+            var documentsRetrieved = _docSearch.GetAllDocuments(
+                searchParams.q,searchParams.searchFacets,searchParams.currentPage, searchParams.polygonString, searchParams.queryType);
 			var azureManager = new AzureManager(_configuration);
             var viewModel = new DocumentsRetrievedViewModel
             {
