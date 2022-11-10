@@ -814,9 +814,49 @@ input:checked + .slider:before {
     background-color: royalblue;
     color: white;
     padding: 2px 5px;
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.entity:hover {
+    cursor: pointer;
 }
 
 .pdfviewer {
     min-height: 100vh;
     width: 100%
+}
+
+.entity .popuptext {
+    visibility: hidden;
+    width: 160px;
+    background-color: white;
+    border: 1px solid black;
+    color: black;
+    text-align: center;
+    border-radius: 6px;
+    width: 700px;
+    height: 500px;
+    padding: 8px 0;
+    position: fixed;
+    top:30%;
+    left:50%;
+    overflow: scroll;
+}
+
+
+/* Toggle this class - hide and show the popup */
+.entity .show {
+    visibility: visible;
+    -webkit-animation: fadeIn 1s;
+    animation: fadeIn 1s;
+}
+
+.color-words {
+    color: red;
 }

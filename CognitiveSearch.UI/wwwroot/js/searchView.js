@@ -1,9 +1,13 @@
-﻿
+﻿const popupElement = document.createElement("div");
+var popOpened = false;
+var previousWord = "";
+
 function onSelectedChanged(event) {
     deleteAllHtmlElements();
 
     const pdfViewer = document.getElementById("pdfViewer");
     const selectedOptionValue = event.currentTarget.selectedOptions[0].value;
+    const entitiesTypes = ["party_name", "entity_suffix", "entity_description", "company_number", "role", "jurisdiction", "address", "PhoneNumber", "Email"];
 
     if (selectedOptionValue === "none") {
         pdfViewer.src = " ";
@@ -20,17 +24,56 @@ function onSelectedChanged(event) {
     entities.classList.add("relations-container");
     entitiesContainer.appendChild(entities);
 
-    for (let index = 0; index < selectedOption.named_entities.length; index++) {
-        const entityElement = document.createElement("div");
-        entityElement.classList.add('entity');
-        entityElement.id = selectedOption.named_entities[index].id;
+    popupElement.classList.add("popuptext");
+    popupElement.id = "entitypopup";
+    popupElement.innerText = selectedOption.content;
 
-        entityElement.innerText = selectedOption.named_entities[index].text;
-        entities.appendChild(entityElement);
+    for (let index = 0; index < selectedOption.named_entities.length; index++) {
+        if (entitiesTypes.includes(selectedOption.named_entities[index].type)) {
+            const entityElement = document.createElement("div");
+            entityElement.classList.add('entity');
+            entityElement.id = selectedOption.named_entities[index].id;
+            entityElement.accessKey = selectedOption.named_entities[index].start + ',' + selectedOption.named_entities[index].end;
+            entityElement.innerText = selectedOption.named_entities[index].text;
+
+            entityElement.appendChild(popupElement);
+            entities.appendChild(entityElement);
+
+            entityElement.addEventListener('click', onClickEntityHandler);
+        }
     }
 
     emphasizeRelationsBetweenEntities(selectedOption.named_entities_relations);
     pdfViewer.style.height = entitiesContainer.scrollHeight +"px";
+}
+
+function onClickEntityHandler(event) {
+    //const accessKeys = event.currentTarget.accessKey.split(',');
+    //const start = parseInt(accessKeys[0]);
+    //const end = parseInt(accessKeys[1]);
+    //console.log(popupElement.innerHTML
+    popupElement.style.left = (event.x - popupElement.scrollWidth) + "px";
+    popupElement.style.top = event.y + "px";
+    popupElement.classList.toggle("show");
+
+    if (popOpened == false) {
+        previousWord = event.currentTarget.innerText;
+        const x = popupElement.innerHTML;
+        const y = x.replaceAll(previousWord, previousWord.fontcolor("red"));
+
+        popupElement.innerHTML = y;
+
+        popOpened = true;
+    }
+    else {
+        const x = popupElement.innerHTML;
+        const y = x.replaceAll("<font color=\"red\">" + previousWord + "</font>", previousWord);
+
+        popupElement.innerHTML = y;
+
+        popOpened = false;
+    }
+    
 }
 
 function emphasizeRelationsBetweenEntities(relations) {
